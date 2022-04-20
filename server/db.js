@@ -8,13 +8,20 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const getProducts = () => pool.query('SELECT * FROM products WHERE id<10');
+const getProducts = (min, max) => pool.query(`SELECT * FROM products WHERE id>${min} AND id<${max};`);
 
-const getProductWithFeatures = (id) => {
-  // ToDo: join with features
-  console.log('ID param: ', id);
+const getProductByID = (id) => {
   const queryString = `SELECT * FROM products WHERE id=${id}`;
   return pool.query(queryString);
+};
+
+const getFeaturesByID = (id) => {
+  const queryString = `SELECT row_to_json(X) FROM (SELECT feature, value FROM features WHERE product_id=${id}) AS X`;
+  const query = {
+    text: queryString,
+    rowMode: 'array',
+  };
+  return pool.query(query);
 };
 
 const getStyles = (id) => {
@@ -29,6 +36,7 @@ const getRelated = (id) => {
 };
 
 exports.getProducts = getProducts;
-exports.getProductWithFeatures = getProductWithFeatures;
+exports.getProductByID = getProductByID;
+exports.getFeaturesByID = getFeaturesByID;
 exports.getStyles = getStyles;
 exports.getRelated = getRelated;
