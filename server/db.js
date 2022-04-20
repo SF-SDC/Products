@@ -24,10 +24,20 @@ const getFeaturesByID = (id) => {
   return pool.query(query);
 };
 
-const getStyles = (id) => {
+const getStylesByID = (id) => {
   // ToDo: join with photos and SKUs, remove product ID
   const queryString = `SELECT * FROM styles WHERE product_id=${id}`;
   return pool.query(queryString);
+};
+
+const getPhotosByID = (id) => {
+  // ToDo: join with photos and SKUs, remove product ID
+  const queryString = `SELECT style_id, url, thumbnail_url FROM photos WHERE photos.style_id IN (SELECT style_id FROM styles WHERE product_id=${id})`;
+  const query = {
+    text: queryString,
+    // rowMode: 'array',
+  };
+  return pool.query(query);
 };
 
 const getRelated = (id) => {
@@ -38,5 +48,6 @@ const getRelated = (id) => {
 exports.getProducts = getProducts;
 exports.getProductByID = getProductByID;
 exports.getFeaturesByID = getFeaturesByID;
-exports.getStyles = getStyles;
+exports.getStylesByID = getStylesByID;
+exports.getPhotosByID = getPhotosByID;
 exports.getRelated = getRelated;

@@ -18,7 +18,10 @@ app.get('/products', (req, res) => {
     count = parseInt(req.query.count, 10);
   }
   db.getProducts(page - 1, count + 1)
-    .then((results) => res.send(results.rows))
+    .then((results) => {
+      res.send(results.rows);
+      console.log(results);
+    })
     .catch((err) => res.status(500).send(err.body));
 });
 
@@ -37,8 +40,18 @@ app.get('/products/:id', (req, res) => {
 app.get('/products/:id/styles', (req, res) => {
   // get product_id, plus array of styles {product_id: 1, results: []}
   console.log('Reqest to: ', req.url, req.params);
-  db.getStyles(req.params.id)
-    .then((results) => res.send(results.rows))
+  Promise.all(([db.getStylesByID(req.params.id), db.getPhotosByID(req.params.id)]))
+    .then((values) => {
+      // const response = {
+      //   product_id: req.params.id,
+      //   results: values[1].rows,
+      // };
+
+      // response.results.forEach(function (style, index) {
+      //   style.photos = values[1].rows[index];
+      // });
+      res.send(values);
+    })
     .catch((err) => res.status(500).send(err.body));
 });
 
