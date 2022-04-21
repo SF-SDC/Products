@@ -8,27 +8,29 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const getProducts = () => pool.query('SELECT * FROM products WHERE id<10');
+const getProducts = (min, max) => pool.query(`SELECT * FROM products WHERE id>${min} AND id<${max};`);
 
-const getProductWithFeatures = (id) => {
-  // ToDo: join with features
-  console.log('ID param: ', id);
-  const queryString = `SELECT * FROM products WHERE id=${id}`;
+const getProductByID = (id) => {
+  const queryString = `SELECT *,
+  (SELECT ARRAY(SELECT row_to_json(X) FROM (SELECT feature, value FROM features WHERE product_id=${id}) AS X) AS features)
+  FROM products WHERE id=${id} LIMIT 1`;
   return pool.query(queryString);
 };
 
-const getStyles = (id) => {
-  // ToDo: join with photos and SKUs, remove product ID
-  const queryString = `SELECT * FROM styles WHERE product_id=${id}`;
+const getStylesByID = (id) => {
+  const queryString = `SELECT styles.style_id, styles.name, styles.original_price, styles.sale_price, styles."default?",
+  (SELECT ARRAY (SELECT to_json(pics) FROM (SELECT photos.url, photos.thumbnail_url FROM photos WHERE photos.style_id=styles.style_id) AS pics)) AS photos,
+  (SELECT json_object_agg(skus.sku, json_build_object('quantity',skus.quantity,'size',skus.size)) FROM skus WHERE skus.style_id=styles.style_id) AS skus
+ FROM styles WHERE styles.product_id=${id}`;
   return pool.query(queryString);
 };
 
 const getRelated = (id) => {
-  const queryString = `SELECT related_id FROM related WHERE product_id=${id}`;
+  const queryString = `SELECT ARRAY(SELECT related_id FROM related WHERE product_id=${id})`;
   return pool.query(queryString);
 };
 
 exports.getProducts = getProducts;
-exports.getProductWithFeatures = getProductWithFeatures;
-exports.getStyles = getStyles;
+exports.getProductByID = getProductByID;
+exports.getStylesByID = getStylesByID;
 exports.getRelated = getRelated;
