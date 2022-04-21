@@ -11,43 +11,26 @@ const pool = new Pool({
 const getProducts = (min, max) => pool.query(`SELECT * FROM products WHERE id>${min} AND id<${max};`);
 
 const getProductByID = (id) => {
-  const queryString = `SELECT * FROM products WHERE id=${id}`;
+  const queryString = `SELECT *,
+  (SELECT ARRAY(SELECT row_to_json(X) FROM (SELECT feature, value FROM features WHERE product_id=${id}) AS X) AS features)
+  FROM products WHERE id=${id} LIMIT 1`;
   return pool.query(queryString);
-};
-
-const getFeaturesByID = (id) => {
-  const queryString = `SELECT row_to_json(X) FROM (SELECT feature, value FROM features WHERE product_id=${id}) AS X`;
-  const query = {
-    text: queryString,
-    rowMode: 'array',
-  };
-  return pool.query(query);
 };
 
 const getStylesByID = (id) => {
-  // ToDo: join with photos and SKUs, remove product ID
-  const queryString = `SELECT * FROM styles WHERE product_id=${id}`;
+  const queryString = `SELECT styles.style_id, styles.name, styles.original_price, styles.sale_price, styles."default?",
+  (SELECT ARRAY (SELECT to_json(pics) FROM (SELECT photos.url, photos.thumbnail_url FROM photos WHERE photos.style_id=styles.style_id) AS pics)) AS photos,
+  (SELECT json_object_agg(skus.sku, json_build_object('quantity',skus.quantity,'size',skus.size)) FROM skus WHERE skus.style_id=styles.style_id) AS skus
+ FROM styles WHERE styles.product_id=${id}`;
   return pool.query(queryString);
 };
 
-const getPhotosByID = (id) => {
-  // ToDo: join with photos and SKUs, remove product ID
-  const queryString = `SELECT style_id, url, thumbnail_url FROM photos WHERE photos.style_id IN (SELECT style_id FROM styles WHERE product_id=${id})`;
-  const query = {
-    text: queryString,
-    // rowMode: 'array',
-  };
-  return pool.query(query);
-};
-
 const getRelated = (id) => {
-  const queryString = `SELECT related_id FROM related WHERE product_id=${id}`;
+  const queryString = `SELECT ARRAY(SELECT related_id FROM related WHERE product_id=${id})`;
   return pool.query(queryString);
 };
 
 exports.getProducts = getProducts;
 exports.getProductByID = getProductByID;
-exports.getFeaturesByID = getFeaturesByID;
 exports.getStylesByID = getStylesByID;
-exports.getPhotosByID = getPhotosByID;
 exports.getRelated = getRelated;

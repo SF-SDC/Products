@@ -20,46 +20,36 @@ app.get('/products', (req, res) => {
   db.getProducts(page - 1, count + 1)
     .then((results) => {
       res.send(results.rows);
-      console.log(results);
     })
     .catch((err) => res.status(500).send(err.body));
 });
 
 app.get('/products/:id', (req, res) => {
   // get all product info, plus array of features
-  console.log('Reqest to: ', req.url, req.params);
-  Promise.all(([db.getProductByID(req.params.id), db.getFeaturesByID(req.params.id)]))
+  db.getProductByID(req.params.id)
     .then((values) => {
-      const result = values[0].rows[0];
-      result.features = values[1].rows.flat();
-      res.send(result);
+      res.send(values.rows);
     })
     .catch((err) => res.status(500).send(err.body));
 });
 
 app.get('/products/:id/styles', (req, res) => {
   // get product_id, plus array of styles {product_id: 1, results: []}
-  console.log('Reqest to: ', req.url, req.params);
-  Promise.all(([db.getStylesByID(req.params.id), db.getPhotosByID(req.params.id)]))
-    .then((values) => {
-      // const response = {
-      //   product_id: req.params.id,
-      //   results: values[1].rows,
-      // };
-
-      // response.results.forEach(function (style, index) {
-      //   style.photos = values[1].rows[index];
-      // });
-      res.send(values);
+  db.getStylesByID(req.params.id)
+    .then((styles) => {
+      const response = {
+        product_id: req.params.id,
+        results: styles.rows,
+      };
+      res.send(response);
     })
     .catch((err) => res.status(500).send(err.body));
 });
 
 app.get('/products/:id/related', (req, res) => {
   // get array of related styles [2,3,4]
-  console.log('Reqest to: ', req.url, req.params);
   db.getRelated(req.params.id)
-    .then((results) => res.send(results.rows))
+    .then((results) => res.send(results.rows[0].array))
     .catch((err) => res.status(500).send(err.body));
 });
 
