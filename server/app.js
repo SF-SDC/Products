@@ -17,7 +17,6 @@ app.get('/products', (req, res) => {
   if (req.query.count && parseInt(req.query.count, 10) > 0) {
     count = parseInt(req.query.count, 10);
   }
-  console.log('Page, count: ', page, count);
   db.getProducts((page * count), (page * count) + count + 1)
     .then((results) => {
       res.send(results.rows);

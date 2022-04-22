@@ -1,0 +1,24 @@
+config:
+  target: "http://127.0.0.1:3000"
+  http:
+    pool: 20000
+  phases:
+    - duration: 20
+      arrivalRate: 500
+      name: heavy (500 per sec)
+    - duration: 20
+      arrivalRate: 1000
+      name: extreme (1000 per sec)
+    - duration: 20
+      arrivalRate: 1800
+      name: face-melt (1800 per sec)
+    - duration: 20
+      arrivalRate: 2000
+      name: plaid (2000 per sec)
+
+
+scenarios:
+  - name: 'Get products'
+    flow:
+      - get:
+          url: '/products?page={{ $randomNumber (100000, 200000)}}'
