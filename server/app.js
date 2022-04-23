@@ -5,10 +5,15 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('server/loader'));
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
+});
+
+app.get('/loaderio-4818f771d3bb1eeef0990e3fd1ca83c6.txt', (req, res) => {
+  res.status(200).send();
 });
 
 app.get('/test', (req, res) => {
