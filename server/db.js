@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -7,6 +8,8 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
+
+const testQuery = () => pool.query('SELECT NOW()');
 
 const getProducts = (min, max) => pool.query(`SELECT * FROM products WHERE id>${min} AND id<${max};`);
 
@@ -34,3 +37,4 @@ exports.getProducts = getProducts;
 exports.getProductByID = getProductByID;
 exports.getStylesByID = getStylesByID;
 exports.getRelated = getRelated;
+exports.testQuery = testQuery;
