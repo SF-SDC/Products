@@ -1,10 +1,12 @@
 const express = require('express');
+const compression = require('compression');
 const db = require('./db');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(compression());
 app.use(express.static('server/loader'));
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -54,6 +56,9 @@ app.get('/products/:id', (req, res) => {
 
 app.get('/products/:id/styles', (req, res) => {
   // get product_id, plus array of styles {product_id: 1, results: []}
+  if (req.params.id < 1 || req.params.id > 1000011) {
+    req.params.id = 1;
+  }
   db.getStylesByID(req.params.id)
     .then((styles) => {
       const response = {
