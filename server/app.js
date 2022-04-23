@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(compression());
+app.use(compression()); //
 app.use(express.static('server/loader'));
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
