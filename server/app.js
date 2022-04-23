@@ -5,6 +5,11 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
 app.get('/products', (req, res) => {
   // get array of product objects
@@ -26,6 +31,9 @@ app.get('/products', (req, res) => {
 
 app.get('/products/:id', (req, res) => {
   // get all product info, plus array of features
+  if (req.params.id < 1 || req.params.id > 1000011) {
+    req.params.id = 1;
+  }
   db.getProductByID(req.params.id)
     .then((values) => {
       res.send(values.rows[0]);
