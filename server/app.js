@@ -11,6 +11,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/test', (req, res) => {
+  db.testQuery()
+    .then((result) => res.send(result))
+    .catch((err) => res.send(err.stack));
+});
+
 app.get('/products', (req, res) => {
   // get array of product objects
   // TODO: handle page and count requests
